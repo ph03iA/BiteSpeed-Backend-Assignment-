@@ -1,6 +1,53 @@
-import { PrismaClient, Contact, LinkPrecedence } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-const prisma = new PrismaClient();
+type Contact = {
+  id: number;
+  phoneNumber: string | null;
+  email: string | null;
+  linkedId: number | null;
+  linkPrecedence: "primary" | "secondary";
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+};
+
+type ContactClient = {
+  findUnique(args: { where: { id: number } }): Promise<Contact | null>;
+  findMany(args: { where: unknown; orderBy?: { createdAt: "asc" } }): Promise<Contact[]>;
+  create(args: {
+    data: {
+      email: string | null;
+      phoneNumber: string | null;
+      linkedId?: number;
+      linkPrecedence: "primary" | "secondary";
+    };
+  }): Promise<Contact>;
+  update(args: {
+    where: { id: number };
+    data: {
+      linkedId?: number;
+      linkPrecedence?: "primary" | "secondary";
+    };
+  }): Promise<Contact>;
+  updateMany(args: {
+    where: { linkedId: number };
+    data: { linkedId: number };
+  }): Promise<{ count: number }>;
+};
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL is required to initialize Prisma client");
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const { PrismaClient } = require("@prisma/client") as {
+  PrismaClient: new (options: { adapter: PrismaPg }) => { contact: ContactClient };
+};
+const prisma = new PrismaClient({ adapter });
 
 interface IdentifyResponse {
   contact: {
@@ -87,7 +134,7 @@ export async function identifyContact(
       data: {
         email,
         phoneNumber,
-        linkPrecedence: LinkPrecedence.primary,
+        linkPrecedence: "primary",
       },
     });
     return buildResponse(newContact);
@@ -117,7 +164,7 @@ export async function identifyContact(
         where: { id: otherPrimary.id },
         data: {
           linkedId: canonicalPrimary.id,
-          linkPrecedence: LinkPrecedence.secondary,
+          linkPrecedence: "secondary",
         },
       });
 
@@ -150,7 +197,7 @@ export async function identifyContact(
         email,
         phoneNumber,
         linkedId: canonicalPrimary.id,
-        linkPrecedence: LinkPrecedence.secondary,
+        linkPrecedence: "secondary",
       },
     });
   }
