@@ -2,6 +2,21 @@
 
 A web service that identifies and links customer contacts across multiple purchases, even when different email addresses and phone numbers are used.
 
+## Submission Details
+
+- **GitHub Repository**: `https://github.com/ph03iA/BiteSpeed-Backend-Assignment-.git`
+- **Hosted Base URL**: `https://bitespeed-identity-quee.onrender.com`
+- **Identify Endpoint**: `POST https://bitespeed-identity-quee.onrender.com/identify`
+
+### Assignment Checklist
+
+1. [x] Code published to GitHub.
+2. [x] Work committed in small, meaningful commits.
+3. [x] `/identify` endpoint implemented and exposed.
+4. [x] Application hosted online (Render) and endpoint shared above.
+5. [x] API accepts JSON request body (not form-data).
+6. [x] Task ready for submission.
+
 ## Tech Stack
 
 - **Runtime**: Node.js with TypeScript
@@ -75,6 +90,8 @@ Identifies and reconciles a customer's contact information.
 ```
 
 At least one of `email` or `phoneNumber` must be provided.
+
+> Important: send payload as raw JSON (`Content-Type: application/json`), not `form-data`.
 
 **Response (200 OK):**
 
